@@ -1,0 +1,1 @@
+Sai üle mindud intelliJ peale (eelnevalt Eclipse Mars). Sai tehtud ka uus repo ja ilusti lsiatud mitte vaja minevad failid gitignore-i. Logi failid ka dropboxi ja gitignore-i.

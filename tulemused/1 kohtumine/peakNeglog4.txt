@@ -1,0 +1,14 @@
+Neg: Feb 19 46249                count  0               hälve  0.707           keskmine  1.500          
+Neg: Feb 21 52606                count  0               hälve  0.331           keskmine  0.875          
+Neg: Feb 16 37666                count  0               hälve  0.696           keskmine  1.625          
+Neg: Feb 16 nagios               count  3               hälve  6.708           keskmine  19.500         
+Neg: Feb 21 33701                count  0               hälve  0.696           keskmine  1.625          
+Neg: Feb 17 53965                count  0               hälve  0.707           keskmine  1.500          
+Neg: Feb 20 38406                count  0               hälve  0.707           keskmine  1.500          
+Neg: Feb 17 44682                count  0               hälve  0.331           keskmine  0.875          
+Neg: Feb 21 49510                count  0               hälve  0.331           keskmine  0.875          
+Neg: Feb 15 55304                count  0               hälve  0.707           keskmine  1.500          
+Neg: Feb 16 55651                count  0               hälve  0.331           keskmine  0.875          
+Neg: Feb 17 55701                count  0               hälve  0.927           keskmine  1.875          
+Neg: Feb 21 51312                count  0               hälve  0.331           keskmine  0.875          
+Neg: Feb 21 pam_unix(cron:session): count  15              hälve  11.758          keskmine  44.000         

@@ -1,0 +1,15 @@
+17.03.2016 kohtumine. Esimene kord pos ja neg piigid. Daemon.log.4 tulemused.
+
+negatiivsetel 0 count välja. {{Done}}
+log 4 imelik whitespace? parsimisel jäävad osad tühikud alles. {{Done}}
+viskame arvuti nimed välja, sest muutub müraks. {{Done}}
+koolon ja võrdusmärk ja single ja double quote ka eraldajaks, saab müra vähemaks ja rohkem pihta lööke {{Done}}
+keskmisega piiramine, et vähendada müra ja 1x esinevaid sõnu. eelduseks praegu on keskmine>2.0 {{Done}}
+tulemüüri logidest tuleks timestamp lõpust võtta, kui on olemas.
+tulemus.txt failist esimene ja viimane rida annab teada aja vahemiku, mida uuriti.
+
+graafikud vaja teha java fx-ga proovida.piisavalt lihstate algoritmidega saaks infot kätte logist, mitte luua neoruvõrke jne.
+klusterdamine,agregeerimine(mis tehnoloogiad juba olemas).edukriteerium: leida midagi, mida pole mingi teise programmiag leitud või ise pole elitud.
+siis on väga hea, sest on kasulik
+eesmärk: kas sellisest meetodist on kasu, et leida midagi uut,mida varem pole.
+avaliku ssh-ga arvuti, käiakse kangutamas koreast/jaapanist. levinumad aksutajanimed
