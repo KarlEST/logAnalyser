@@ -5,11 +5,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Scanner;
+import java.util.*;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -21,32 +18,34 @@ import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.ApplicationFrame;
 import org.jfree.ui.RefineryUtilities;
-import org.jfree.ui.RefineryUtilities;
 
 public class logAnalyser extends ApplicationFrame {
-    static String dateMonth = "";
-    static String dateDay = "";
-    static String dateTime = "";
-    static PrintWriter writer = null;
-    static String timePrint = "";
+    static private String dateMonth = "";
+    static private String dateDay = "";
+    static private String dateTime = "";
+    static private PrintWriter writer = null;
+    static private String timePrint = "";
+    static private String firstDate = "";
 
-    public logAnalyser(final String title) {
+    public logAnalyser(final String title, ArrayList<Integer> values) {
         super(title);
-        final XYDataset dataset = createDataset();
-        final JFreeChart chart = createChart(dataset);
+        final XYDataset dataset = createDataset(values);
+        final JFreeChart chart = createChart(dataset, title);
         final ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setPreferredSize(new java.awt.Dimension(560, 370));
         chartPanel.setMouseZoomable(true, false);
         setContentPane(chartPanel);
     }
 
-    private XYDataset createDataset() {
+    private XYDataset createDataset(ArrayList<Integer> values) {
         final TimeSeries series = new TimeSeries("Random Data");//, Second.class
-        Day current = new Day();
-        double value = 100.0;
-        for (int i = 0; i < 4000; i++) {
+        String[] dateSplit = firstDate.split(" ");
+
+        Day current = new Day(Integer.parseInt(dateSplit[1]),Integer.parseInt(dateSplit[0]),Integer.parseInt(dateSplit[3]));
+        double value = 0.0;
+        for (int i = 0; i < values.size(); i++) {
             try {
-                value = value + Math.random() - 0.5;
+                value = values.get(i);
                 series.add(current, new Double(value));
                 current = (Day) current.next();
             } catch (SeriesException e) {
@@ -57,8 +56,8 @@ public class logAnalyser extends ApplicationFrame {
         return new TimeSeriesCollection(series);
     }
 
-    private JFreeChart createChart(final XYDataset dataset) {
-        return ChartFactory.createTimeSeriesChart("1 day", "Days",
+    private JFreeChart createChart(final XYDataset dataset, String title) {
+        return ChartFactory.createTimeSeriesChart(title, "Day",
                 "Value", dataset, false, false, false);
     }
 
@@ -66,50 +65,18 @@ public class logAnalyser extends ApplicationFrame {
         ArrayList<String> date = getDate(line);
         String dateMonthPart = date.get(0);
         String dateDayPart = date.get(1);
-        String dateTimePart = date.get(2);
         if (dateDayPart.equals(dateDay) && dateMonthPart.equals(dateMonth)) {
             return false;
         } else {
-            timePrint = dateMonth + " " + dateDay + " " + dateTime;
+            timePrint = dateMonth + " " + dateDay;
             if (!dateDayPart.equals(dateDay)) {
                 dateDay = dateDayPart;
             }
             if (!dateMonthPart.equals(dateMonth)) {
                 dateMonth = dateMonthPart;
             }
-            if (!dateTimePart.equals(dateTime)) {
-                dateTime = dateTimePart;
-            }
         }
         return true;
-    }
-
-    public static ArrayList readFile(String filePath) throws IOException {
-        FileInputStream inputStream = null;
-        Scanner sc = null;
-        try {
-            inputStream = new FileInputStream(filePath);
-            sc = new Scanner(inputStream, "UTF-8");
-            if (sc.ioException() != null) {
-                throw sc.ioException();
-            }
-            ArrayList arrayHelp = new ArrayList();
-            arrayHelp.add(inputStream);
-            arrayHelp.add(sc);
-            return arrayHelp;
-        } finally {
-
-        }
-    }
-
-    public static void closeFile(Scanner sc, FileInputStream inputStream)
-            throws IOException {
-        if (inputStream != null) {
-            inputStream.close();
-        }
-        if (sc != null) {
-            sc.close();
-        }
     }
 
     public static void firstLine(String filePath) throws IOException {
@@ -119,7 +86,41 @@ public class logAnalyser extends ApplicationFrame {
         dateMonth = firstLineParts.get(0);
         dateDay = firstLineParts.get(1);
         dateTime = firstLineParts.get(2);
+
+        switch (dateMonth) {
+            case "Jan":
+                firstDate += "1 ";
+                break;
+            case "Feb":firstDate += "2 ";
+                break;
+            case "Mar":firstDate += "3 ";
+                break;
+            case "Apr":firstDate += "4 ";
+                break;
+            case "May":firstDate += "5 ";
+                break;
+            case "Jun":firstDate += "6 ";
+                break;
+            case "Jul":firstDate += "7 ";
+                break;
+            case "Aug":firstDate += "8 ";
+                break;
+            case "Sep":firstDate += "9 ";
+                break;
+            case "Oct":firstDate += "10 ";
+                break;
+            case "Nov":firstDate += "11 ";
+                break;
+            case "Dec":firstDate += "12 ";
+                break;
+        }
+        firstDate += dateDay;
+        firstDate += " ";
+        firstDate += dateTime;
+        firstDate += " 2016";
         firstLine.close();
+
+
     }
 
     public static ArrayList<String> getDate(String line) {
@@ -144,88 +145,6 @@ public class logAnalyser extends ApplicationFrame {
         return result;
     }
 
-    public static ArrayList workFileDay(Scanner sc)
-            throws FileNotFoundException, UnsupportedEncodingException {
-        writer = new PrintWriter("tulemus.txt", "UTF-8");
-        Map<String, Integer> map = new HashMap<String, Integer>();
-        Map<String, Integer> globalMap = new HashMap<String, Integer>();
-        map.put("count", 0);
-        globalMap.put("count", 0);
-        globalMap.put("dayCount", 1);
-        ArrayList list = new ArrayList();
-
-        while (sc.hasNextLine()) {
-            String line = sc.nextLine();
-            String[] lineSplit = line.split(" |:|=|\"|\'");
-            if (newDay(line)) {
-                ArrayList mapTime = new ArrayList();
-                mapTime.add(map);
-                String[] dateNowSplit = timePrint.split(" ");
-                mapTime.add(dateNowSplit[0] + " " + dateNowSplit[1]);
-                list.add(mapTime);
-                prindiTulemus(map);
-                map = new HashMap<String, Integer>();
-                for (int i = 5; i < lineSplit.length; i++) {
-                    String word = lineSplit[i];
-                    if ("".equals(word)) {
-                        continue;
-                    }
-                    if (map.containsKey(word)) {
-                        globalMap.put(word, globalMap.get(word) + 1);
-                        map.put(word, map.get(word) + 1);
-                    } else {
-                        if (globalMap.containsKey(word)) {
-                            globalMap.put(word, globalMap.get(word) + 1);
-                        } else {
-                            globalMap.put(word, 1);
-                        }
-
-                        map.put(word, 1);
-                    }
-                }
-                map.put("count", 1);
-                globalMap.put("count", globalMap.get("count") + 1);
-                globalMap.put("dayCount", globalMap.get("dayCount") + 1);
-            } else {
-
-                for (int i = 5; i < lineSplit.length; i++) {
-                    String word = lineSplit[i];
-                    if ("".equals(word)) {
-                        continue;
-                    }
-                    if (map.containsKey(word)) {
-                        globalMap.put(word, globalMap.get(word) + 1);
-                        map.put(word, map.get(word) + 1);
-                    } else {
-                        if (globalMap.containsKey(word)) {
-                            globalMap.put(word, globalMap.get(word) + 1);
-                        } else {
-                            globalMap.put(word, 1);
-                        }
-                        map.put(word, 1);
-                    }
-                }
-                map.put("count", map.get("count") + 1);
-                globalMap.put("count", globalMap.get("count") + 1);
-            }
-        }
-
-        ArrayList mapTime = new ArrayList();
-        mapTime.add(map);
-        mapTime.add(dateMonth + " " + dateDay);
-        list.add(mapTime);
-        // kuva(list,3);
-        timePrint = dateMonth + " " + dateDay + " " + dateTime;
-        prindiTulemus(map);
-        ArrayList listAbi = new ArrayList();
-        listAbi.add(globalMap);
-        // kuva(listAbi, 0);
-        ArrayList returnList = new ArrayList();
-        returnList.add(list);
-        returnList.add(globalMap);
-        writer.close();
-        return returnList;
-    }
 
     private static void prindiTulemus(Map<String, Integer> map)
             throws FileNotFoundException, UnsupportedEncodingException {
@@ -238,158 +157,217 @@ public class logAnalyser extends ApplicationFrame {
         writer.println();
     }
 
-    public static void kuva(ArrayList kuvaList, int i) {
 
-        Map<String, Integer> map = (HashMap) kuvaList.get(i);
-        for (String key : map.keySet()) {
-            int value = map.get(key);
-            System.out.println(key + " : " + value);
-        }
-    }
-
-    public static void run(int time, String filePath) throws IOException {
-        ArrayList fileReadArray = readFile(filePath);
-        FileInputStream inputStream = (FileInputStream) fileReadArray.get(0);
-        Scanner sc = (Scanner) fileReadArray.get(1);
-        firstLine(filePath);
-        ArrayList resultList = new ArrayList();
-        switch (time) {
-            case 24:
-                resultList = workFileDay(sc);
-                break;
-            case 1:
-                break;
-            case 5:
-                break;
-        }
-        ArrayList listList = (ArrayList) resultList.get(0);
-        HashMap<String, Double> globalAverageMap = globalAverage((HashMap) resultList
-                .get(1));
-        HashMap<String, Double> standardDeviationMap = standardDeviation(
-                globalAverageMap, (ArrayList) listList);
-        calculatePeaks(globalAverageMap, standardDeviationMap,
-                (ArrayList) listList);
-        closeFile(sc, inputStream);
-
-    }
-
-    private static void calculatePeaks(
-            HashMap<String, Double> globalAverageMap,
-            HashMap<String, Double> standardDeviationMap,
-            ArrayList<ArrayList> listList) throws FileNotFoundException,
-            UnsupportedEncodingException {
+    private static ArrayList calculatePeaks(HashMap<String, Double> globalAverageMap, HashMap<String, Double> standardDeviationMap, ArrayList<ArrayList> listList)
+            throws FileNotFoundException, UnsupportedEncodingException {
         PrintWriter writerPos = new PrintWriter("peakPos.txt", "UTF-8");
         PrintWriter writerNeg = new PrintWriter("peakNeg.txt", "UTF-8");
+        ArrayList resultList = new ArrayList();
         for (String key : globalAverageMap.keySet()) {
             Double globalValue = globalAverageMap.get(key);
             Double deviationValue = standardDeviationMap.get(key);
             for (ArrayList list : listList) {
                 Integer mapValue = 0;
-                HashMap<String, Integer> map = (HashMap<String, Integer>) list
-                        .get(0);
+                HashMap<String, Integer> map = (HashMap<String, Integer>) list.get(0);
                 String date = (String) list.get(1);
                 if (map.containsKey(key)) {
                     mapValue = map.get(key);
                 }
-                if (globalValue + 2 * deviationValue < mapValue
-                        && globalValue >= 2) {
-                    // System.out.println("Pos: " + date + " : "+ key + "\t\t
-                    // count "+mapValue+"\t\t hälve "+deviationValue+"\t\t
-                    // keskmine "+globalValue);
-                    // System.out.printf("Pos: %s %-20s count %-15s hälve
-                    // %-15.3f keskmine %-15.3f\n",
-                    // date,key,mapValue,deviationValue,globalValue);
-                    writerPos
-                            .printf("Pos: %s %-20s count  %-15s hälve  %-15.3f keskmine  %-15.3f\n",
-                                    date, key, mapValue, deviationValue,
-                                    globalValue);
-                } else if (globalValue - 2 * deviationValue > mapValue
-                        && mapValue != 0 && globalValue >= 2.0) {
-                    // System.out.println("Neg: " + date +" : " + key + "\t\t
-                    // count "+mapValue+"\t\t hälve "+deviationValue+"\t\t
-                    // keskmine "+globalValue);
-                    // System.out.printf("Neg: %s %-20s count %-15s hälve
-                    // %-15.3f keskmine %-15.3f\n",
-                    // date,key,mapValue,deviationValue,globalValue);
-                    writerNeg
-                            .printf("Neg: %s %-20s count  %-15s hälve  %-15.3f keskmine  %-15.3f\n",
-                                    date, key, mapValue, deviationValue,
-                                    globalValue);
+                if (globalValue + 2 * deviationValue < mapValue && globalValue >= 2) {
+                    ArrayList peak = new ArrayList();
+                    peak.add(key);
+                    peak.add(mapValue);
+                    resultList.add(peak);
+                    writerPos.printf("%s %-20s count  %-15s hälve  %-15.3f keskmine  %-15.3f\n", date, key, mapValue, deviationValue, globalValue);
+                } else if (globalValue - 2 * deviationValue > mapValue && mapValue != 0 && globalValue >= 2.0) {
+                    writerNeg.printf("%s %-20s count  %-15s hälve  %-15.3f keskmine  %-15.3f\n", date, key, mapValue, deviationValue, globalValue);
 
                 }
             }
         }
         writerPos.close();
         writerNeg.close();
-
+        return resultList;
     }
 
-    private static HashMap<String, Double> standardDeviation(
-            HashMap<String, Double> globalAverageMap,
-            ArrayList<ArrayList> listList) {
+    private static HashMap<String, Double> standardDeviation(HashMap<String, Double> globalAverageMap, ArrayList<ArrayList> wordCountList) {
         HashMap<String, Double> sdMap = new HashMap<>();
-        int dayCount = listList.size();
+        int dayCount = wordCountList.size();
         for (String key : globalAverageMap.keySet()) {
             Double globalValue = globalAverageMap.get(key);
             Double deviationSum = 0.0;
-            for (ArrayList list : listList) {
-                HashMap<String, Integer> map = (HashMap<String, Integer>) list
-                        .get(0);
+            for (ArrayList list : wordCountList) {
+                HashMap<String, Integer> wordCountMap = (HashMap<String, Integer>) list.get(0);
                 int mapValue = 0;
-                if (map.containsKey(key)) {
-                    mapValue = map.get(key);
+                if (wordCountMap.containsKey(key)) {
+                    mapValue = wordCountMap.get(key);
                 }
                 Double deviation = Math.pow((mapValue - globalValue), 2);
                 deviationSum += deviation;
-                // System.out.println(key+" : "+globalValue+" - "+mapValue+" :
-                // "+deviation);
             }
-            // System.out.println("Deviation sum for: "+key+" is
-            // "+deviationSum);
             Double standardDeviation = Math.sqrt(deviationSum / dayCount);
             sdMap.put(key, standardDeviation);
-            // System.out.println(key+" : "+standardDeviation);
         }
         return sdMap;
     }
 
     private static HashMap<String, Double> globalAverage(
-            HashMap<String, Integer> globalMap) {
-        double dayCount = (int) globalMap.get("dayCount");
+            HashMap<String, Integer> globalMap, int count) {
+
         HashMap<String, Double> globalAverageMap = new HashMap<>();
         for (String key : globalMap.keySet()) {
             int value = globalMap.get(key);
-            if (key != "dayCount" && key != "count") {
-                globalAverageMap.put(key, value / dayCount);
-                // System.out.println(key + " : " + value + " : " +
-                // value/dayCount);
-            }
+            globalAverageMap.put(key, value / (double) count);
+
         }
         return globalAverageMap;
 
     }
 
+
+    public static void run(int time, String filePath) throws IOException {
+        firstLine(filePath);
+        ArrayList resultList = new ArrayList();
+        switch (time) {
+            case 24:
+                resultList = workDay(filePath);
+                break;
+            case 1:
+                break;
+            case 5:
+                break;
+        }
+        System.out.println("Word counting complete!");
+        ArrayList wordCountList = (ArrayList) resultList.get(0);
+        HashMap<String, Double> globalAverageMap = globalAverage((HashMap) resultList.get(1), wordCountList.size());
+        System.out.println("Average calculation complete!");
+        HashMap<String, Double> standardDeviationMap = standardDeviation(globalAverageMap, (ArrayList) wordCountList);
+        System.out.println("Standard deviation calculation complete!");
+        ArrayList posPeaks = calculatePeaks(globalAverageMap, standardDeviationMap, (ArrayList) wordCountList);
+        System.out.println("Peak calculation complete!");
+
+        Collections.sort(posPeaks, new Comparator<List<Integer>>() {
+            @Override
+            public int compare(List<Integer> a, List<Integer> b) {
+                return b.get(1).compareTo(a.get(1));
+            }
+        });
+
+        makeGraph((String) ((ArrayList) posPeaks.get(0)).get(0), wordCountList);
+
+    }
+
+    private static void makeGraph(String name, ArrayList wordCountList) {
+        ArrayList<Integer> values = makeValueList(name, wordCountList);
+        final logAnalyser demo = new logAnalyser(name, values);
+        demo.pack();
+        RefineryUtilities.positionFrameRandomly(demo);
+        demo.setVisible(true);
+
+    }
+
+    private static ArrayList makeValueList(String name, ArrayList<ArrayList> wordCountList) {
+        ArrayList resultList = new ArrayList();
+        for (ArrayList list : wordCountList) {
+            Integer mapValue = 0;
+            HashMap<String, Integer> wordCountMap = (HashMap<String, Integer>) list.get(0);
+            if (wordCountMap.containsKey(name)) {
+                mapValue = wordCountMap.get(name);
+            }
+            resultList.add(mapValue);
+        }
+
+        return resultList;
+    }
+
+
+    public static ArrayList workDay(String filePath)
+            throws IOException {
+        ArrayList returnList = new ArrayList(); //Contains wordCountList and totalCountMap
+        Map<String, Integer> wordCountMap = new HashMap<String, Integer>();
+        Map<String, Integer> totalCountMap = new HashMap<String, Integer>();
+        ArrayList wordCountList = new ArrayList(); //Contains wordCountMap
+        writer = new PrintWriter("dayWordCounts.txt", "UTF-8");
+
+        //Stream Log File
+        FileInputStream inputStream = new FileInputStream(filePath);
+        Scanner sc = new Scanner(inputStream, "UTF-8");
+        if (sc.ioException() != null) {
+            throw sc.ioException();
+        }
+
+        //Word Frequency Counting
+        while (sc.hasNextLine()) {
+            String line = sc.nextLine();
+            String subLine = line.substring(16, line.length()); //Remove syslog Format Date
+            subLine = subLine.substring(subLine.indexOf(" ") + 1, subLine.length());
+            subLine = subLine.substring(subLine.indexOf(" ") + 1, subLine.length());
+            String[] lineSplit = subLine.split(" |:|=|\"|\'");
+            if (newDay(line)) {
+                prindiTulemus(wordCountMap);
+                ArrayList mapTime = new ArrayList();//mapTime is for having date in peak files
+                mapTime.add(wordCountMap);
+                String[] dateNowSplit = timePrint.split(" ");
+                mapTime.add(dateNowSplit[0] + " " + dateNowSplit[1]);
+                wordCountList.add(mapTime);
+                wordCountMap = new HashMap<String, Integer>();
+
+            }
+            for (String word : lineSplit) {
+                if ("".equals(word)) {
+                    continue;
+                }
+                if (wordCountMap.containsKey(word)) {
+                    totalCountMap.put(word, totalCountMap.get(word) + 1);
+                    wordCountMap.put(word, wordCountMap.get(word) + 1);
+                } else {
+                    if (totalCountMap.containsKey(word)) {
+                        totalCountMap.put(word, totalCountMap.get(word) + 1);
+                    } else {
+                        totalCountMap.put(word, 1);
+                    }
+                    wordCountMap.put(word, 1);
+                }
+
+            }
+        }
+
+        timePrint = dateMonth + " " + dateDay;
+        prindiTulemus(wordCountMap);
+        writer.close();
+        ArrayList mapTime = new ArrayList();
+        mapTime.add(wordCountMap);
+        mapTime.add(dateMonth + " " + dateDay);
+        wordCountList.add(mapTime);
+        //Close Log File Stream
+        inputStream.close();
+        sc.close();
+        returnList.add(wordCountList);
+        returnList.add(totalCountMap);
+        return returnList;
+    }
+
+
     public static void main(String[] args) throws IOException {
 
-        System.out.println("le beginning\n");
-        long startTime = System.currentTimeMillis(); // läpakas
-        //run(24,"C:\\Users\\karll\\Documents\\Baka\\Baka\\logid\\var\\log\\daemon.log.4");
+        long startTime = System.currentTimeMillis();
+        //Käsk jooksutamiseks: run(int aeg,String logi_fail);
 
-        //run(24,"C:\\Users\\karll\\Documents\\Baka\\Baka\\logid\\var\\kosmos-auth-logs\\auth.log.1");
-        // run(24,"C:\\Users\\karll\\Documents\\Baka\\Baka\\obfuscated-ssg-6days.log\\obfuscated-ssg-6days.log");
-        // töö arvuti
 
-        // run(24,"C:\\Users\\Karl\\Documents\\Baka\\Baka\\logid\\var\\log\\daemon.log.4");
+        //run(24, "C:\\Users\\karll\\Documents\\logAnalyser\\katse.log");
+        run(24, "C:\\Users\\karll\\Documents\\logAnalyser\\logs\\kosmos-auth-logs\\auth.log.4");
+
         long endTime = System.currentTimeMillis();
         long totalTime = endTime - startTime;
         System.out.println("\nTotal runtime: " + totalTime + "ms");
-        System.out.println("the end");
-
-        final String title = "Peaks";
+        final String title = "logAnalyser";
+        /*
         final logAnalyser demo = new logAnalyser(title);
         demo.pack();
         RefineryUtilities.positionFrameRandomly(demo);
         demo.setVisible(true);
+        */
+
 
     }
 }
