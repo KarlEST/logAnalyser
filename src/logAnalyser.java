@@ -1,14 +1,9 @@
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.*;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
+import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.general.SeriesException;
 import org.jfree.data.time.Day;
@@ -41,7 +36,7 @@ public class logAnalyser extends ApplicationFrame {
         final TimeSeries series = new TimeSeries("Random Data");//, Second.class
         String[] dateSplit = firstDate.split(" ");
 
-        Day current = new Day(Integer.parseInt(dateSplit[1]),Integer.parseInt(dateSplit[0]),Integer.parseInt(dateSplit[3]));
+        Day current = new Day(Integer.parseInt(dateSplit[1]), Integer.parseInt(dateSplit[0]), Integer.parseInt(dateSplit[3]));
         double value = 0.0;
         for (int i = 0; i < values.size(); i++) {
             try {
@@ -91,27 +86,38 @@ public class logAnalyser extends ApplicationFrame {
             case "Jan":
                 firstDate += "1 ";
                 break;
-            case "Feb":firstDate += "2 ";
+            case "Feb":
+                firstDate += "2 ";
                 break;
-            case "Mar":firstDate += "3 ";
+            case "Mar":
+                firstDate += "3 ";
                 break;
-            case "Apr":firstDate += "4 ";
+            case "Apr":
+                firstDate += "4 ";
                 break;
-            case "May":firstDate += "5 ";
+            case "May":
+                firstDate += "5 ";
                 break;
-            case "Jun":firstDate += "6 ";
+            case "Jun":
+                firstDate += "6 ";
                 break;
-            case "Jul":firstDate += "7 ";
+            case "Jul":
+                firstDate += "7 ";
                 break;
-            case "Aug":firstDate += "8 ";
+            case "Aug":
+                firstDate += "8 ";
                 break;
-            case "Sep":firstDate += "9 ";
+            case "Sep":
+                firstDate += "9 ";
                 break;
-            case "Oct":firstDate += "10 ";
+            case "Oct":
+                firstDate += "10 ";
                 break;
-            case "Nov":firstDate += "11 ";
+            case "Nov":
+                firstDate += "11 ";
                 break;
-            case "Dec":firstDate += "12 ";
+            case "Dec":
+                firstDate += "12 ";
                 break;
         }
         firstDate += dateDay;
@@ -253,7 +259,54 @@ public class logAnalyser extends ApplicationFrame {
             }
         });
 
-        makeGraph((String) ((ArrayList) posPeaks.get(0)).get(0), wordCountList);
+        /* //for graphs
+        for(int i = 0;i<10;i++){
+            makeGraph((String) ((ArrayList) posPeaks.get(i)).get(0), wordCountList);
+        }
+*/
+        //make jpeg graph
+        for(int i = 0;i<10;i++){
+            makeImage((String) ((ArrayList) posPeaks.get(i)).get(0), wordCountList);
+        }
+
+
+    }
+
+    private static void makeImage(String title, ArrayList wordCountList) throws IOException {
+        final TimeSeries series = new TimeSeries( title );
+        String[] dateSplit = firstDate.split(" ");
+
+        Day current = new Day(Integer.parseInt(dateSplit[1]), Integer.parseInt(dateSplit[0]), Integer.parseInt(dateSplit[3]));
+
+        double value = 0.0;
+        ArrayList<Integer> values = makeValueList(title, wordCountList);
+        for ( int i = 0 ; i < values.size() ; i++ )
+        {
+            try
+            {
+                value = values.get(i);
+                series.add( current , new Double( value ) );
+                current = ( Day ) current.next( );
+            }
+            catch ( SeriesException e )
+            {
+                System.err.println( "Error adding to series" );
+            }
+        }
+        final XYDataset dataset=( XYDataset )new TimeSeriesCollection(series);
+        JFreeChart timechart = ChartFactory.createTimeSeriesChart(
+                title,
+                "Day",
+                "Value",
+                dataset,
+                false,
+                false,
+                false);
+
+        int width = 560; /* Width of the image */
+        int height = 370; /* Height of the image */
+        File timeChart = new File( ".\\graphs\\"+title+".png" );
+        ChartUtilities.saveChartAsPNG( timeChart, timechart, width, height );
 
     }
 
