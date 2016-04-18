@@ -6,10 +6,7 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.general.SeriesException;
-import org.jfree.data.time.Day;
-import org.jfree.data.time.Second;
-import org.jfree.data.time.TimeSeries;
-import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.data.time.*;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.ApplicationFrame;
 import org.jfree.ui.RefineryUtilities;
@@ -33,16 +30,19 @@ public class logAnalyser extends ApplicationFrame {
     }
 
     private XYDataset createDataset(ArrayList<Integer> values) {
-        final TimeSeries series = new TimeSeries("Random Data");//, Second.class
+        final TimeSeries series = new TimeSeries("Random Data",Hour.class);//, Second.class
         String[] dateSplit = firstDate.split(" ");
 
-        Day current = new Day(Integer.parseInt(dateSplit[1]), Integer.parseInt(dateSplit[0]), Integer.parseInt(dateSplit[3]));
+        //Day current = new Day(Integer.parseInt(dateSplit[1]), Integer.parseInt(dateSplit[0]),
+        // Integer.parseInt(dateSplit[3]));
+        String[] dateTimeSplit = dateSplit[2].split(":");
+        Hour current = new Hour(Integer.parseInt(dateTimeSplit[0]),Integer.parseInt(dateSplit[1]), Integer.parseInt(dateSplit[0]), Integer.parseInt(dateSplit[3]));
         double value = 0.0;
         for (int i = 0; i < values.size(); i++) {
             try {
                 value = values.get(i);
                 series.add(current, new Double(value));
-                current = (Day) current.next();
+                current = (Hour) current.next();
             } catch (SeriesException e) {
                 System.err.println(e);
             }
@@ -56,7 +56,7 @@ public class logAnalyser extends ApplicationFrame {
                 "Value", dataset, false, false, false);
     }
 
-    public static boolean newDay(String line) {
+    private static boolean newDay(String line) {
         ArrayList<String> date = getDate(line);
         String dateMonthPart = date.get(0);
         String dateDayPart = date.get(1);
@@ -74,7 +74,7 @@ public class logAnalyser extends ApplicationFrame {
         return true;
     }
 
-    public static void firstLine(String filePath) throws IOException {
+    private static void firstLine(String filePath) throws IOException {
         BufferedReader firstLine = new BufferedReader(new FileReader(filePath));
         String firstLineText = firstLine.readLine();
         ArrayList<String> firstLineParts = getDate(firstLineText);
@@ -129,7 +129,7 @@ public class logAnalyser extends ApplicationFrame {
 
     }
 
-    public static ArrayList<String> getDate(String line) {
+    private static ArrayList<String> getDate(String line) {
         String[] splitList = line.split("");
 
         String month = splitList[0] + splitList[1] + splitList[2];
@@ -231,14 +231,15 @@ public class logAnalyser extends ApplicationFrame {
     }
 
 
-    public static void run(int time, String filePath) throws IOException {
+    private static void run(int time, String filePath) throws IOException {
         firstLine(filePath);
         ArrayList resultList = new ArrayList();
         switch (time) {
             case 24:
-                resultList = workDay(filePath);
+                resultList = workDay(filePath, new NewDay());
                 break;
             case 1:
+                resultList = workDay(filePath, new NewHour());
                 break;
             case 5:
                 break;
@@ -259,41 +260,38 @@ public class logAnalyser extends ApplicationFrame {
             }
         });
 
-        /* //for graphs
+         //for graphs
         for(int i = 0;i<10;i++){
             makeGraph((String) ((ArrayList) posPeaks.get(i)).get(0), wordCountList);
         }
-*/
-        //make jpeg graph
-        for(int i = 0;i<10;i++){
+
+       /* //make jpeg graph
+        System.out.println(posPeaks.size());
+        for (int i = 0; i < 10 && i < posPeaks.size(); i++) {
             makeImage((String) ((ArrayList) posPeaks.get(i)).get(0), wordCountList);
         }
-
+*/
 
     }
 
     private static void makeImage(String title, ArrayList wordCountList) throws IOException {
-        final TimeSeries series = new TimeSeries( title );
+        final TimeSeries series = new TimeSeries(title);
         String[] dateSplit = firstDate.split(" ");
 
         Day current = new Day(Integer.parseInt(dateSplit[1]), Integer.parseInt(dateSplit[0]), Integer.parseInt(dateSplit[3]));
 
         double value = 0.0;
         ArrayList<Integer> values = makeValueList(title, wordCountList);
-        for ( int i = 0 ; i < values.size() ; i++ )
-        {
-            try
-            {
+        for (int i = 0; i < values.size(); i++) {
+            try {
                 value = values.get(i);
-                series.add( current , new Double( value ) );
-                current = ( Day ) current.next( );
-            }
-            catch ( SeriesException e )
-            {
-                System.err.println( "Error adding to series" );
+                series.add(current, new Double(value));
+                current = (Day) current.next();
+            } catch (SeriesException e) {
+                System.err.println("Error adding to series");
             }
         }
-        final XYDataset dataset=( XYDataset )new TimeSeriesCollection(series);
+        final XYDataset dataset = (XYDataset) new TimeSeriesCollection(series);
         JFreeChart timechart = ChartFactory.createTimeSeriesChart(
                 title,
                 "Day",
@@ -305,8 +303,8 @@ public class logAnalyser extends ApplicationFrame {
 
         int width = 560; /* Width of the image */
         int height = 370; /* Height of the image */
-        File timeChart = new File( ".\\graphs\\"+title+".png" );
-        ChartUtilities.saveChartAsPNG( timeChart, timechart, width, height );
+        File timeChart = new File(".\\graphs\\" + title + ".png");
+        ChartUtilities.saveChartAsPNG(timeChart, timechart, width, height);
 
     }
 
@@ -334,7 +332,7 @@ public class logAnalyser extends ApplicationFrame {
     }
 
 
-    public static ArrayList workDay(String filePath)
+    private static ArrayList workDay(String filePath, Command command)
             throws IOException {
         ArrayList returnList = new ArrayList(); //Contains wordCountList and totalCountMap
         Map<String, Integer> wordCountMap = new HashMap<String, Integer>();
@@ -356,7 +354,7 @@ public class logAnalyser extends ApplicationFrame {
             subLine = subLine.substring(subLine.indexOf(" ") + 1, subLine.length());
             subLine = subLine.substring(subLine.indexOf(" ") + 1, subLine.length());
             String[] lineSplit = subLine.split(" |:|=|\"|\'");
-            if (newDay(line)) {
+            if (command.execute(line)) {
                 prindiTulemus(wordCountMap);
                 ArrayList mapTime = new ArrayList();//mapTime is for having date in peak files
                 mapTime.add(wordCountMap);
@@ -385,7 +383,7 @@ public class logAnalyser extends ApplicationFrame {
             }
         }
 
-        timePrint = dateMonth + " " + dateDay;
+        timePrint = dateMonth + " " + dateDay + " " + dateTime;
         prindiTulemus(wordCountMap);
         writer.close();
         ArrayList mapTime = new ArrayList();
@@ -401,14 +399,59 @@ public class logAnalyser extends ApplicationFrame {
     }
 
 
+    interface Command {
+        public Boolean execute(String line);
+    }
+
+    private static class NewDay implements Command {
+        public Boolean execute(String line) {
+            return newDay(line);
+        }
+    }
+
+    private static class NewHour implements Command {
+        public Boolean execute(String line) {
+            return newHour(line);
+        }
+    }
+
+    public static void callCommand(Command command, String line) {
+        command.execute(line);
+    }
+
+    private static boolean newHour(String line) {
+        ArrayList<String> date = getDate(line);
+        String dateMonthPart = date.get(0);
+        String dateDayPart = date.get(1);
+        String[] dateTimePart = date.get(2).split(":");
+        String[] dateTimePart2 = dateTime.split(":");
+
+        if (dateDayPart.equals(dateDay) && dateMonthPart.equals(dateMonth) && dateTimePart[0].equals(dateTimePart2[0])) {
+            return false;
+        } else {
+
+            timePrint = dateMonth + " " + dateDay + " " + dateTime;
+            if (!dateDayPart.equals(dateDay)) {
+                dateDay = dateDayPart;
+            }
+            if (!dateMonthPart.equals(dateMonth)) {
+                dateMonth = dateMonthPart;
+            }
+            if (!dateTimePart[0].equals(dateTimePart2[0])) {
+                dateTime = date.get(2);
+            }
+        }
+        return true;
+    }
+
     public static void main(String[] args) throws IOException {
 
         long startTime = System.currentTimeMillis();
         //Käsk jooksutamiseks: run(int aeg,String logi_fail);
 
 
-        //run(24, "C:\\Users\\karll\\Documents\\logAnalyser\\katse.log");
-        run(24, "C:\\Users\\karll\\Documents\\logAnalyser\\logs\\kosmos-auth-logs\\auth.log.4");
+        //run(1, "C:\\Users\\karll\\Documents\\logAnalyser\\katse.log");
+        run(1, "C:\\Users\\karll\\Documents\\logAnalyser\\logs\\kosmos-auth-logs\\auth.log.4");
 
         long endTime = System.currentTimeMillis();
         long totalTime = endTime - startTime;
