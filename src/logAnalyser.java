@@ -244,12 +244,21 @@ public class logAnalyser {
             name = "hour";
         }
         int count = 100;
-        posPeaks = posPeaks.subList(0, count > posPeaks.size() ? posPeaks.size() : count);
+        List checkList = new ArrayList<>();
+        List posPeaksList = new ArrayList<>();
+        for(int k = 0;k<posPeaks.size();k++){
+            if(!checkList.contains((String) ((ArrayList) posPeaks.get(k)).get(0))){
+                checkList.add((String) ((ArrayList) posPeaks.get(k)).get(0));
+                posPeaksList.add(posPeaks.get(k));
+            }
+        }
+        posPeaks = posPeaksList.subList(0, count > posPeaksList.size() ? posPeaksList.size() : count);
         samePeaksDay(posPeaks, wordCountList);
-       /* int n=0;
+       int n=0;
         int i = 0;
         ArrayList check = new ArrayList();
-        while(n<10 && n < posPeaks.size()){
+        while(n<50 && n < posPeaks.size()&&i<posPeaks.size()){
+            //System.out.println((String) ((ArrayList) posPeaks.get(i)).get(0));
             if(!check.contains((String) ((ArrayList) posPeaks.get(i)).get(0))){
                 makeImage((String) ((ArrayList) posPeaks.get(i)).get(0), wordCountList, time, name);
                 n++;
@@ -260,7 +269,7 @@ public class logAnalyser {
 
         }
         System.out.println("Image creation complete!");
-        */
+
 
     }
 
@@ -284,6 +293,7 @@ public class logAnalyser {
                     ArrayList<Integer> value = values.get(k);
                     ArrayList<Integer> value2 = values2.get(k);
                     double number = value.get(0) / (double) value2.get(0);
+                    number = Math.log(number);
                     dividedPeaks.add(number);
                     averageSum += number;
 
@@ -296,7 +306,13 @@ public class logAnalyser {
                 }
                 double deviation = Math.sqrt(deviationSum / values.size());
 
-                if (deviation < 1.5) {
+               /* if(name.equals("166.111.7.72")&&name2.equals("166.111.26.5")){
+                    System.out.println("average "+average);
+                    System.out.println("count "+ values.size());
+                    System.out.println("deviation "+deviation);
+
+                }*/
+                if (deviation < 2) {
                     System.out.println(name + "  " + name2 + "  " + deviation);
                 }
             }
@@ -593,3 +609,5 @@ public class logAnalyser {
  * Count ja date sõnadega mis saab. Kui järsku on ka logifailides. äkki _count_?
  * https://ristov.github.io/slct/ http://www.nec-labs.com/~gfj/xia-sdm-14.pdf
  */
+
+//https://stackoverflow.com/questions/1200054/java-library-for-parsing-command-line-parameters
