@@ -10,3 +10,7 @@ lisasime naturaal logaritmi, siiamaani visuaalselt sarnane, aga selle meetodiga 
 Graafikdu visuaalse võrdlemise jaoks head, aga autentimise logi pealt pole põnevaid sündmuseid leidnud.
 
 Kontrollida, kas on võimalik leida suhteid ka mitte piikidega. Selleks teha üks test, kus alsta läbi kõikide sõnadega ja vaadata,kas leidub korrelatsioone.
+
+--------------------------------------------------------------------------------------------------------------------------------------
+Mis väljad tulevad käsurealt võtta? mis tekst help-i panna.
+tuli error, kui taheti luua graafikut "<" piigist. See character on windowsis keelatud ja seetõttu viskas errorit. Parandatud
