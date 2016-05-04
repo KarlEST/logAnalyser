@@ -31,7 +31,9 @@ public class logAnalyser {
     @Parameter(names = "--corr", description = "Calculate positive peaks correlations.")
     private static boolean corr = false;
     @Parameter(names = {"--savePath", "-sp"}, description = "Path where the results will be saved")
-    private static String fileSavePath="";
+    private static String fileSavePath = "";
+    @Parameter(names = {"--topCount", "-tp"}, description = "Number of peaks to use for correlation analysis.")
+    private static Integer countPosPeaks = 100;
 
     //Returns corresponding int to month name
     private static int getMonthInt(String month) {
@@ -237,8 +239,8 @@ public class logAnalyser {
     private static ArrayList calculatePeaks(HashMap<String, Double> globalAverageMap,
                                             HashMap<String, Double> standardDeviationMap, ArrayList<ArrayList> listList)
             throws FileNotFoundException, UnsupportedEncodingException {
-        PrintWriter writerPos = new PrintWriter(fileSavePath+fileName+"\\peakPos.txt", "UTF-8");
-        PrintWriter writerNeg = new PrintWriter(fileSavePath+fileName+"\\peakNeg.txt", "UTF-8");
+        PrintWriter writerPos = new PrintWriter(fileSavePath + fileName + "\\peakPos.txt", "UTF-8");
+        PrintWriter writerNeg = new PrintWriter(fileSavePath + fileName + "\\peakNeg.txt", "UTF-8");
         ArrayList resultList = new ArrayList();
         for (String key : globalAverageMap.keySet()) {
             Double globalValue = globalAverageMap.get(key);
@@ -291,7 +293,7 @@ public class logAnalyser {
 
     //Find peaks that have correlation between them
     private static void samePeaksDay(List<ArrayList> posPeaks, ArrayList wordCountList) throws FileNotFoundException, UnsupportedEncodingException {
-        PrintWriter writerCorr = new PrintWriter(fileSavePath+fileName+"\\correlations.txt", "UTF-8");
+        PrintWriter writerCorr = new PrintWriter(fileSavePath + fileName + "\\correlations.txt", "UTF-8");
         for (int i = 0; i < posPeaks.size(); i++) {
             ArrayList list = posPeaks.get(i);
             String name = (String) list.get(0);
@@ -398,9 +400,9 @@ public class logAnalyser {
     //Checks if title contains characters which can't be in title
     private static boolean checkTitle(String title) {
         List charList = new ArrayList();
-        charList.addAll(Arrays.asList('"','#','%','*',':','<','>','?','/','\\','|'));
-        for(int i = 0; i<charList.size(); i++){
-            if(title.indexOf((char) charList.get(i))>=0){
+        charList.addAll(Arrays.asList('"', '#', '%', '*', ':', '<', '>', '?', '/', '\\', '|'));
+        for (int i = 0; i < charList.size(); i++) {
+            if (title.indexOf((char) charList.get(i)) >= 0) {
                 return false;
             }
         }
@@ -409,7 +411,7 @@ public class logAnalyser {
 
     //Create one graph depending on the time interval
     private static void makeImage(String title, ArrayList wordCountList, String name) throws IOException {
-        if(checkTitle(title)){
+        if (checkTitle(title)) {
             final XYDataset dataset;
             if (time == 24) {
                 dataset = createDatasetDay(title, wordCountList);
@@ -429,13 +431,12 @@ public class logAnalyser {
 
             int width = 560; /* Width of the image */
             int height = 370; /* Height of the image */
-            File grapsDir = new File(fileSavePath+fileName+"\\graphs");
+            File grapsDir = new File(fileSavePath + fileName + "\\graphs");
             grapsDir.mkdir();
-            File timeChart = new File(fileSavePath+fileName+"\\graphs\\" + title + ".png");
+            File timeChart = new File(fileSavePath + fileName + "\\graphs\\" + title + ".png");
             ChartUtilities.saveChartAsPNG(timeChart, timechart, width, height);
         }
     }
-
 
 
     private static void makeImages(List posPeaks, ArrayList wordCountList) throws IOException {
@@ -475,9 +476,9 @@ public class logAnalyser {
         }
         File f = new File(filePath);
         fileName = f.getName();
-        File f2 = new File(fileSavePath+fileName);
+        File f2 = new File(fileSavePath + fileName);
         f2.mkdir();
-        writer = new PrintWriter(fileSavePath+fileName+"\\wordFrequency.txt", "UTF-8");
+        writer = new PrintWriter(fileSavePath + fileName + "\\wordFrequency.txt", "UTF-8");
         System.out.println("Started counting words!");
         //Word Frequency Counting
         while (sc.hasNextLine()) {
@@ -584,7 +585,6 @@ public class logAnalyser {
             }
         });
 
-        int countPosPeaks = 100;
         List checkList = new ArrayList<>();
         List posPeaksList = new ArrayList<>();
         for (int k = 0; k < posPeaks.size(); k++) {
@@ -594,11 +594,18 @@ public class logAnalyser {
             }
         }
         posPeaks = posPeaksList.subList(0, countPosPeaks > posPeaksList.size() ? posPeaksList.size() : countPosPeaks);
-        if(corr){
+        if (corr) {
             samePeaksDay(posPeaks, wordCountList);
         }
-        if(imageCount>0){
-            makeImages(posPeaks,wordCountList);
+        if (imageCount > 0) {
+            makeImages(posPeaks, wordCountList);
+        }
+    }
+
+    //Check if save path has \ in the end
+    private void checkSavePath() {
+        if (fileSavePath.length() > 0 && (fileSavePath.charAt(fileSavePath.length() - 1)) != '\\') {
+            fileSavePath += "\\";
         }
     }
 
@@ -606,12 +613,14 @@ public class logAnalyser {
         if (help) {
             jcommander.usage();
         } else {
-            if(imageCount<0){
+            if (imageCount < 0) {
                 throw new ParameterException("Parameter --image or -i should be positive integer (found " + imageCount + ")");
             }
+            checkSavePath();
             runLogAnalyser();
         }
     }
+
 
     public static void main(String[] args) throws IOException {
         long startTime = System.currentTimeMillis();
