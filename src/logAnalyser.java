@@ -292,7 +292,7 @@ public class logAnalyser {
     }
 
     //Find peaks that have correlation between them
-    private static void samePeaksDay(List<ArrayList> posPeaks, ArrayList wordCountList) throws FileNotFoundException, UnsupportedEncodingException {
+    private static void calcCorrelation(List<ArrayList> posPeaks, ArrayList wordCountList) throws FileNotFoundException, UnsupportedEncodingException {
         PrintWriter writerCorr = new PrintWriter(fileSavePath + fileName + "\\correlations.txt", "UTF-8");
         for (int i = 0; i < posPeaks.size(); i++) {
             ArrayList list = posPeaks.get(i);
@@ -322,11 +322,11 @@ public class logAnalyser {
                 }
                 double deviation = Math.sqrt(deviationSum / values.size());
                 if (deviation < 2) {
-                    //System.out.println(name + "  " + name2 + "  " + deviation);
                     writerCorr.println(name + "  " + name2 + "  " + deviation);
                 }
             }
         }
+        writerCorr.close();
         System.out.println("Peak correlation calculation complete!");
     }
 
@@ -595,7 +595,7 @@ public class logAnalyser {
         }
         posPeaks = posPeaksList.subList(0, countPosPeaks > posPeaksList.size() ? posPeaksList.size() : countPosPeaks);
         if (corr) {
-            samePeaksDay(posPeaks, wordCountList);
+            calcCorrelation(posPeaks, wordCountList);
         }
         if (imageCount > 0) {
             makeImages(posPeaks, wordCountList);
@@ -614,7 +614,8 @@ public class logAnalyser {
             jcommander.usage();
         } else {
             if (imageCount < 0) {
-                throw new ParameterException("Parameter --image or -i should be positive integer (found " + imageCount + ")");
+                throw new ParameterException("Parameter --image or -i should be positive integer (found " +
+                        imageCount + ")");
             }
             checkSavePath();
             runLogAnalyser();
@@ -635,5 +636,3 @@ public class logAnalyser {
 /*
  * https://ristov.github.io/slct/ http://www.nec-labs.com/~gfj/xia-sdm-14.pdf
  */
-
-//https://stackoverflow.com/questions/1200054/java-library-for-parsing-command-line-parameters
