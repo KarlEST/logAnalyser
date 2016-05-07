@@ -549,10 +549,7 @@ public class logAnalyser {
         }
     }
 
-//    public static void callCommand(Command command, String line) {
-//        command.execute(line);
-//    }
-
+    //Control place for all the methods.
     private static void runLogAnalyser() throws IOException {
         setDateFromFirstLine(filePath);
         ArrayList resultList = new ArrayList();
@@ -609,6 +606,7 @@ public class logAnalyser {
         }
     }
 
+    //Checks if --help is required or no. If not then run program.
     private void checkHelp(JCommander jcommander) throws IOException, ParameterException {
         if (help) {
             jcommander.usage();

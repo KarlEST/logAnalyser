@@ -1,2 +1,0 @@
-Feb 15 nagios               count  3               hälve  6.708           keskmine  19.500         
-Feb 21 pam_unix(cron        count  15              hälve  11.758          keskmine  44.000         
