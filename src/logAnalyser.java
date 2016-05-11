@@ -631,6 +631,3 @@ public class logAnalyser {
         System.out.println("\nTotal runtime: " + totalTime + "ms");
     }
 }
-/*
- * https://ristov.github.io/slct/ http://www.nec-labs.com/~gfj/xia-sdm-14.pdf
- */
