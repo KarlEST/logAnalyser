@@ -449,7 +449,7 @@ public class logAnalyser {
         int n = 0;
         int i = 0;
         ArrayList check = new ArrayList();
-        while (n < imageCount && n < posPeaks.size() && i < posPeaks.size()) {
+        while (n <= imageCount && n < posPeaks.size() && i < posPeaks.size()) {
             if (!check.contains((String) ((ArrayList) posPeaks.get(i)).get(0))) {
                 makeImage((String) ((ArrayList) posPeaks.get(i)).get(0), wordCountList, name);
                 n++;
